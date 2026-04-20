@@ -44,7 +44,7 @@ async function safeEqual(a: string, b: string): Promise<boolean> {
   return diff === 0;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/api/")) {
     return NextResponse.next();
   }

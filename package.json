@@ -9,11 +9,20 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx scripts/seed.ts",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3002",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "msw",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",
