@@ -1,5 +1,3 @@
-"use client";
-
 interface YamlPreviewProps {
   data: unknown;
 }

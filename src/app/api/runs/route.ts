@@ -52,13 +52,14 @@ export async function POST(req: Request) {
     const created = db.select().from(eval_runs).where(eq(eval_runs.id, run.id)).get();
     return NextResponse.json(created, { status: 201 });
   } catch (err: unknown) {
-    if (err instanceof Error && err.message.startsWith("DUPLICATE:")) {
-      return NextResponse.json({ error: err.message.slice(10) }, { status: 409 });
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.startsWith("DUPLICATE:")) {
+      return NextResponse.json({ error: "Run already exists" }, { status: 409 });
     }
-    if (err instanceof Error && err.message.startsWith("VALIDATION:")) {
-      return NextResponse.json({ error: "Validation failed", details: err.message.slice(11) }, { status: 400 });
+    if (msg.startsWith("VALIDATION:")) {
+      return NextResponse.json({ error: "Validation failed" }, { status: 400 });
     }
-    console.error("POST /api/runs error:", err instanceof Error ? err.message : "Unknown error");
+    console.error("POST /api/runs error:", msg || "Unknown error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

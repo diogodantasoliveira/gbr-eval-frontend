@@ -1,5 +1,3 @@
-"use client";
-
 import { CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +8,7 @@ interface GraderResult {
   score: number;
   weight?: number;
   required?: boolean;
+  details?: string;
 }
 
 interface GateMatrixProps {
@@ -80,6 +79,10 @@ export function GateMatrix({ gateResult, taskResults }: GateMatrixProps) {
   const tasksPass = taskResults.filter((t) => t.passed).length;
   const tasksFail = taskResults.filter((t) => !t.passed).length;
 
+  const llmGraders = allGraders.filter((g) => g.grader_type === "engineering_judge");
+  const llmPass = llmGraders.filter((g) => g.passed).length;
+  const llmTotal = llmGraders.length;
+
   return (
     <div className="space-y-4">
       {/* Large gate badge */}
@@ -96,7 +99,7 @@ export function GateMatrix({ gateResult, taskResults }: GateMatrixProps) {
       </div>
 
       {/* Summary counts */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className={cn("grid gap-3", llmTotal > 0 ? "grid-cols-2 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4")}>
         <div className="rounded-lg border bg-card p-3 text-center">
           <p className="text-2xl font-bold text-green-600 dark:text-green-400">{tasksPass}</p>
           <p className="text-xs text-muted-foreground mt-0.5">Tasks Passed</p>
@@ -127,6 +130,20 @@ export function GateMatrix({ gateResult, taskResults }: GateMatrixProps) {
             </span>
           </div>
         </div>
+        {llmTotal > 0 && (
+          <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/30 p-3">
+            <p className="text-xs font-medium text-purple-700 dark:text-purple-400 mb-1">LLM Reviews</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-purple-700 dark:text-purple-400">
+                {llmPass}✓
+              </span>
+              <span className="text-sm font-semibold text-purple-400 dark:text-purple-600">
+                {llmTotal - llmPass}✗
+              </span>
+              <span className="text-xs text-muted-foreground">/ {llmTotal}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
