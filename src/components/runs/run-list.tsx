@@ -49,6 +49,26 @@ interface EvalRun {
   source: string;
   started_at: number;
   imported_at: number;
+  metadata?: string | null;
+}
+
+function parseMetadata(raw: string | null | undefined): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function formatDateTimeShort(ms: number): string {
+  return new Date(ms).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 interface RunListProps {
@@ -222,6 +242,7 @@ export function RunList({ runs }: RunListProps) {
               <SortableHead active={sort?.key === "run_id"} direction={sort?.key === "run_id" ? sort.direction : null} onClick={() => onSort("run_id")}>Run ID</SortableHead>
               <TableHead>Layer</TableHead>
               <TableHead>Tier</TableHead>
+              <TableHead>Repo / Branch</TableHead>
               <SortableHead active={sort?.key === "overall_score"} direction={sort?.key === "overall_score" ? sort.direction : null} onClick={() => onSort("overall_score")}>Score</SortableHead>
               <TableHead>Gate</TableHead>
               <SortableHead active={sort?.key === "tasks_passed"} direction={sort?.key === "tasks_passed" ? sort.direction : null} onClick={() => onSort("tasks_passed")}>Tasks</SortableHead>
@@ -247,6 +268,21 @@ export function RunList({ runs }: RunListProps) {
                 <TableCell className="text-muted-foreground text-xs">
                   {run.tier ?? "—"}
                 </TableCell>
+                <TableCell className="text-xs text-muted-foreground max-w-[160px]">
+                  {(() => {
+                    const meta = parseMetadata(run.metadata);
+                    const repo = typeof meta.repo === "string" ? meta.repo : null;
+                    const branch = typeof meta.branch === "string" ? meta.branch : null;
+                    if (!repo && !branch) return <span className="text-muted-foreground/50">—</span>;
+                    return (
+                      <span className="truncate block" title={[repo, branch].filter(Boolean).join(" • ")}>
+                        {repo && <span className="font-medium text-foreground/80">{repo}</span>}
+                        {repo && branch && <span className="text-muted-foreground/60"> • </span>}
+                        {branch && <span className="font-mono">{branch}</span>}
+                      </span>
+                    );
+                  })()}
+                </TableCell>
                 <TableCell>
                   <span className={`font-mono font-semibold ${scoreColor(run.overall_score)}`}>
                     {(run.overall_score * 100).toFixed(1)}%
@@ -268,7 +304,7 @@ export function RunList({ runs }: RunListProps) {
                   {run.source}
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {new Date(run.started_at).toLocaleDateString()}
+                  {formatDateTimeShort(run.started_at)}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">

@@ -21,7 +21,9 @@ interface EvalRun {
   gate_result: string | null;
   source: string;
   started_at: number;
+  finished_at?: number | null;
   imported_at: number;
+  metadata?: string | null;
 }
 
 export default function RunsPage() {
@@ -71,7 +73,7 @@ export default function RunsPage() {
       </PageHeader>
 
       {loading ? (
-        <TableSkeleton columns={9} rows={5} headers={["Run ID", "Layer", "Tier", "Score", "Gate", "Tasks", "Source", "Date", "Actions"]} />
+        <TableSkeleton columns={10} rows={5} headers={["Run ID", "Layer", "Tier", "Repo / Branch", "Score", "Gate", "Tasks", "Source", "Date", "Actions"]} />
       ) : (
         <RunList runs={runs} />
       )}

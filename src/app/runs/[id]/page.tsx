@@ -44,6 +44,17 @@ function formatDuration(startMs: number, endMs: number | null): string {
   return `${secs}s`;
 }
 
+function formatDateTime(ms: number): string {
+  return new Date(ms).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
 export default async function RunDetailPage({
   params,
 }: {
@@ -116,6 +127,21 @@ export default async function RunDetailPage({
                 {gateLabel}
               </dd>
             </div>
+            {(() => {
+              const repo = typeof metadata["repo"] === "string" ? metadata["repo"] : null;
+              return repo ? (
+                <div>
+                  <dt className="text-muted-foreground">Repository</dt>
+                  <dd className="mt-0.5 font-mono text-xs">{repo}</dd>
+                </div>
+              ) : null;
+            })()}
+            {branch && (
+              <div>
+                <dt className="text-muted-foreground">Branch</dt>
+                <dd className="mt-0.5 font-mono text-xs">{branch}</dd>
+              </div>
+            )}
             <div>
               <dt className="text-muted-foreground">Tasks</dt>
               <dd className="mt-0.5 text-xs">
@@ -123,6 +149,16 @@ export default async function RunDetailPage({
                 {" / "}
                 <span className="text-red-600 dark:text-red-400">{run.tasks_failed}✗</span>
                 {" / "}{run.tasks_total}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Started</dt>
+              <dd className="mt-0.5 font-mono text-xs">{formatDateTime(run.started_at)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Finished</dt>
+              <dd className="mt-0.5 font-mono text-xs">
+                {run.finished_at ? formatDateTime(run.finished_at) : <span className="text-amber-600 dark:text-amber-400">In progress</span>}
               </dd>
             </div>
             <div>
@@ -145,12 +181,6 @@ export default async function RunDetailPage({
               <div>
                 <dt className="text-muted-foreground">Git SHA</dt>
                 <dd className="mt-0.5 font-mono text-xs">{gitSha.slice(0, 8)}</dd>
-              </div>
-            )}
-            {branch && (
-              <div>
-                <dt className="text-muted-foreground">Branch</dt>
-                <dd className="mt-0.5 font-mono text-xs">{branch}</dd>
               </div>
             )}
             <div>
