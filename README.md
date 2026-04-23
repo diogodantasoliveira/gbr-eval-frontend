@@ -2,9 +2,9 @@
 
 Admin panel for [gbr-eval](https://github.com/diogodantasoliveira/gbr-eval). Next.js 16 App Router + SQLite (local-first) + Drizzle ORM + shadcn/ui + Tailwind v4.
 
-- 40 pages covering: skills, golden sets, tasks, rubrics, runs, conventions, contracts, calibration, alerts, search.
+- 40 pages covering: skills, golden sets, tasks, rubrics, runs, conventions, contracts, calibration, alerts.
 - 57 API routes under `/api/*` (auth-protected by default).
-- SQLite file at `./gbr-eval.db`, 23 tables, WAL mode.
+- SQLite file at `./gbr-eval.db`, 24 tables, WAL mode.
 
 This repo does **not** stand alone for eval execution — that lives in the backend ([gbr-eval](https://github.com/diogodantasoliveira/gbr-eval)). Clone both side-by-side:
 
@@ -19,7 +19,7 @@ your-workspace/
 | Tool | Minimum | Install |
 |------|---------|---------|
 | Node.js | 20 | https://nodejs.org/ (LTS) |
-| pnpm | 10 | `corepack enable pnpm && corepack prepare pnpm@latest --activate` |
+| pnpm | 9 | `corepack enable pnpm && corepack prepare pnpm@latest --activate` |
 | Git | any | system package manager |
 
 For the full stack (backend + frontend + sample data), follow the single-script bootstrap in the backend repo. This README is only for the frontend half.
@@ -44,7 +44,7 @@ cd gbr-eval-frontend
 
 cp .env.example .env.local       # defaults are fine for local dev
 pnpm install                     # native deps compile via pnpm.onlyBuiltDependencies
-pnpm db:push                     # applies Drizzle schema → ./gbr-eval.db (23 tables)
+pnpm db:push                     # applies Drizzle schema → ./gbr-eval.db (24 tables)
 pnpm db:seed                     # inserts 5 P0 skills + 40 field schemas
 pnpm dev                         # http://localhost:3002
 ```
@@ -97,19 +97,18 @@ See the [backend README](https://github.com/diogodantasoliveira/gbr-eval/blob/ma
 gbr-eval-frontend/
 ├── src/
 │   ├── app/
-│   │   ├── (pages)/             # 40 pages: /, /runs, /golden-sets, /skills, ...
+│   │   ├── [domain]/            # 40 pages: /, /runs, /golden-sets, /skills, ...
 │   │   └── api/                 # 57 API routes — all under proxy.ts auth
 │   ├── components/              # UI (shadcn) and feature components
 │   ├── db/
-│   │   ├── schema.ts            # Drizzle schema — 23 tables, FK-enforced, WAL
+│   │   ├── schema.ts            # Drizzle schema — 24 tables, FK-enforced, WAL
 │   │   └── index.ts             # better-sqlite3 client
 │   ├── lib/
 │   │   ├── pii/                 # PII redaction (CPF, CNPJ, email, phone, RG)
 │   │   ├── validations/         # Zod schemas per domain
 │   │   ├── calibration/         # Cohen's kappa for inter-annotator agreement
 │   │   └── runs/import-run.ts   # Run ingestion logic (used by webhook)
-│   ├── proxy.ts                 # Next 16 proxy — timing-safe auth, rate limit
-│   └── middleware.ts            # (does not exist — renamed to proxy.ts in Next 16)
+│   └── proxy.ts                 # Next 16 proxy — timing-safe auth, rate limit
 ├── scripts/seed.ts              # pnpm db:seed entry point
 ├── drizzle.config.ts            # dialect=sqlite, out=./src/db/migrations
 ├── package.json                 # pnpm.onlyBuiltDependencies for native deps
