@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git add src/gbr_eval/graders/model_judge.py src/gbr_eval/harness/async_suite_runner.py src/gbr_eval/harness/runner.py tests/graders/test_pii_properties.py tests/harness/test_async_suite_ru...",
-  "error": "Exit code 128\nfatal: pathspec 'src/gbr_eval/graders/model_judge.py' did not match any files",
-  "timestamp": "2026-04-20T18:37:47.509Z",
-  "retry_count": 1
-}
