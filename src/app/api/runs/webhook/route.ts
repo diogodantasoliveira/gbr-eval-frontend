@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Duplicate run" }, { status: 409 });
     }
     if (err instanceof Error && err.message.startsWith("VALIDATION:")) {
-      return NextResponse.json({ error: "Validation failed" }, { status: 422 });
+      return NextResponse.json({ error: err.message.slice("VALIDATION:".length) }, { status: 422 });
     }
     console.error("POST /api/runs/webhook error:", err instanceof Error ? err.message : "Unknown error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

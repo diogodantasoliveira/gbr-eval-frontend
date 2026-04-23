@@ -28,7 +28,7 @@ const taskResultSchema = z.object({
 export const importRunSchema = z.object({
   run_id: z.string().min(1),
   layer: z.string().min(1),
-  tier: z.string().optional(),
+  tier: z.string().nullable().optional(),
   started_at: z.string(),
   finished_at: z.string().optional(),
   tasks_total: z.number().int().min(0),
