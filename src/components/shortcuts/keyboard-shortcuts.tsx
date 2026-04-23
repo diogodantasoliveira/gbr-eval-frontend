@@ -78,9 +78,15 @@ export function KeyboardShortcuts() {
       }
     }
 
+    function onShowHelp() {
+      setShowHelp(true);
+    }
+
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("gbr:show-shortcuts", onShowHelp);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("gbr:show-shortcuts", onShowHelp);
       if (pendingGTimer.current) clearTimeout(pendingGTimer.current);
     };
   }, [router]);

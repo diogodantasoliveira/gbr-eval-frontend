@@ -18,6 +18,7 @@ export function SortableHead({ children, active, direction, onClick, className }
     <TableHead
       className={cn("cursor-pointer select-none hover:text-foreground transition-colors", className)}
       onClick={onClick}
+      aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
     >
       <span className="inline-flex items-center gap-1">
         {children}

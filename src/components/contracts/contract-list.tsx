@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, FileJson } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -78,17 +79,11 @@ export function ContractList({ initialData }: ContractListProps) {
 
   if (data.length === 0) {
     return (
-      <div className="rounded-md border border-border">
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-10">
-                No contracts found. Import an OpenAPI spec or create one manually.
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
+      <EmptyState
+        icon={FileJson}
+        title="No contracts found"
+        description="Import an OpenAPI schema to get started."
+      />
     );
   }
 

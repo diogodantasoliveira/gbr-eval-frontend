@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, Users } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableHeader,
@@ -83,9 +84,11 @@ export function SessionList({ sessions }: SessionListProps) {
 
   if (sessions.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">
-        No calibration sessions found.
-      </p>
+      <EmptyState
+        icon={Users}
+        title="No calibration sessions"
+        description="Start a calibration session to measure inter-annotator agreement."
+      />
     );
   }
 

@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye, Download, Search } from "lucide-react";
+import { Pencil, Trash2, Eye, Download, Search, ListChecks } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { useSortable } from "@/hooks/use-sortable";
@@ -132,10 +133,11 @@ export function TaskList({ initialData }: TaskListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 w-[200px]"
+            aria-label="Search"
           />
         </div>
         <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v ?? "all")}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px]" aria-label="Filter by category">
             <SelectValue placeholder="All categories" />
           </SelectTrigger>
           <SelectContent>
@@ -147,7 +149,7 @@ export function TaskList({ initialData }: TaskListProps) {
         </Select>
 
         <Select value={filterLayer} onValueChange={(v) => setFilterLayer(v ?? "all")}>
-          <SelectTrigger className="w-[130px]">
+          <SelectTrigger className="w-[130px]" aria-label="Filter by layer">
             <SelectValue placeholder="All layers" />
           </SelectTrigger>
           <SelectContent>
@@ -159,7 +161,7 @@ export function TaskList({ initialData }: TaskListProps) {
         </Select>
 
         <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v ?? "all")}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[140px]" aria-label="Filter by status">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -202,11 +204,12 @@ export function TaskList({ initialData }: TaskListProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center text-sm text-muted-foreground py-10"
-                >
-                  No tasks found.
+                <TableCell colSpan={7}>
+                  <EmptyState
+                    icon={ListChecks}
+                    title="No tasks found"
+                    description="Create a task or adjust your filters."
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -254,6 +257,7 @@ export function TaskList({ initialData }: TaskListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="View"
+                        aria-label="View"
                         render={<Link href={`/tasks/${t.id}`} />}
                       >
                         <Eye className="size-3.5" />
@@ -262,6 +266,7 @@ export function TaskList({ initialData }: TaskListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="Edit"
+                        aria-label="Edit"
                         render={<Link href={`/tasks/${t.id}/edit`} />}
                       >
                         <Pencil className="size-3.5" />
@@ -270,6 +275,7 @@ export function TaskList({ initialData }: TaskListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="Export"
+                        aria-label="Export"
                         render={<a href={`/api/tasks/${t.id}/export`} download />}
                       >
                         <Download className="size-3.5" />
@@ -278,6 +284,7 @@ export function TaskList({ initialData }: TaskListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="Delete"
+                        aria-label="Delete"
                         onClick={() => handleDelete(t.id, t.task_id)}
                         className="text-destructive hover:text-destructive"
                       >

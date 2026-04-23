@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Keyboard,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
@@ -134,8 +135,20 @@ export function Sidebar() {
               </div>
               <NavContent onNavigate={() => setMobileOpen(false)} />
               <Separator />
-              <div className="p-2">
+              <div className="flex flex-col gap-1 p-2">
                 <ThemeToggle />
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    window.dispatchEvent(new CustomEvent("gbr:show-shortcuts"));
+                  }}
+                  className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  type="button"
+                >
+                  <Keyboard className="size-4 shrink-0" />
+                  <span>Shortcuts</span>
+                  <kbd className="ml-auto inline-flex h-4 min-w-4 items-center justify-center rounded border border-border bg-muted px-1 font-mono text-[10px]">?</kbd>
+                </button>
               </div>
             </div>
           </SheetContent>
@@ -165,6 +178,20 @@ export function Sidebar() {
         <Separator />
         <div className="flex flex-col gap-1 p-2">
           <ThemeToggle collapsed={collapsed} />
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("gbr:show-shortcuts"))}
+            className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            title={collapsed ? 'Keyboard shortcuts' : undefined}
+            type="button"
+          >
+            <Keyboard className="size-4 shrink-0" />
+            {!collapsed && (
+              <>
+                <span>Shortcuts</span>
+                <kbd className="ml-auto hidden lg:inline-flex h-4 min-w-4 items-center justify-center rounded border border-border bg-muted px-1 font-mono text-[10px]">?</kbd>
+              </>
+            )}
+          </button>
           <button
             onClick={toggleCollapse}
             className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"

@@ -93,10 +93,11 @@ export function AlertPanel() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" aria-live="polite">
       {visible.map((alert) => (
         <div
           key={alert.id}
+          role="alert"
           className={cn(
             "flex items-start gap-3 rounded-md border px-4 py-3",
             severityClass(alert.severity)
@@ -128,6 +129,7 @@ export function AlertPanel() {
             size="icon-sm"
             onClick={() => dismiss(alert.id)}
             title="Dismiss"
+            aria-label="Dismiss"
             className="shrink-0"
           >
             <X className="size-3.5" />

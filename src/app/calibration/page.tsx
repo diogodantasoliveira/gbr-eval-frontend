@@ -57,7 +57,7 @@ export default function CalibrationPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
-        <Card>
+        <Card className="transition-colors hover:border-ring/50">
           <CardHeader className="pb-1">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Total Sessions
@@ -67,7 +67,7 @@ export default function CalibrationPage() {
             <p className="text-2xl font-bold">{sessions.length}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-colors hover:border-ring/50">
           <CardHeader className="pb-1">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               In Progress
@@ -79,7 +79,7 @@ export default function CalibrationPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-colors hover:border-ring/50">
           <CardHeader className="pb-1">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Avg Kappa (completed)

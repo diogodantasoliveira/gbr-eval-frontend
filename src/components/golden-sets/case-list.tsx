@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/select";
 import { CaseStatusBadge } from "./case-status-badge";
 import { TagBadge } from "@/components/tags/tag-badge";
-import { Pencil, Clock, Plus } from "lucide-react";
+import { Pencil, Clock, Plus, FileText } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/format-date";
 
 interface GoldenSetCase {
@@ -124,8 +125,12 @@ export function CaseList({ goldenSetId, cases: initialCases }: CaseListProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-10">
-                  No cases found.
+                <TableCell colSpan={6}>
+                  <EmptyState
+                    icon={FileText}
+                    title="No cases found"
+                    description="Add cases to this golden set."
+                  />
                 </TableCell>
               </TableRow>
             ) : (

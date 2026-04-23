@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, ScrollText } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableHeader,
@@ -77,9 +78,11 @@ export function RubricList({ rubrics }: RubricListProps) {
 
   if (rubrics.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">
-        No rubrics found.
-      </p>
+      <EmptyState
+        icon={ScrollText}
+        title="No rubrics found"
+        description="Create a rubric to get started."
+      />
     );
   }
 

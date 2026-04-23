@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { CheckCircle2, XCircle, ChevronDown, ChevronRight, ClipboardList } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableHeader,
@@ -209,7 +210,11 @@ export function RunDetail({ taskResults }: RunDetailProps) {
 
   if (taskResults.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">No task results.</p>
+      <EmptyState
+        icon={ClipboardList}
+        title="No task results"
+        description="This run has no task results."
+      />
     );
   }
 

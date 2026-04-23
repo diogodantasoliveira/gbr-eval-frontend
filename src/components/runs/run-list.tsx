@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Trash2, Eye, Search } from "lucide-react";
+import { Trash2, Eye, Search, BarChart3 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { useSortable } from "@/hooks/use-sortable";
@@ -154,11 +155,12 @@ export function RunList({ runs }: RunListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 w-[200px]"
+            aria-label="Search"
           />
         </div>
         <span className="text-xs text-muted-foreground self-center">{filtered.length} runs</span>
         <Select value={filterLayer} onValueChange={(v) => { if (v) setFilterLayer(v); }}>
-          <SelectTrigger size="sm" className="w-32">
+          <SelectTrigger size="sm" className="w-32" aria-label="Filter by layer">
             <SelectValue placeholder="Layer" />
           </SelectTrigger>
           <SelectContent>
@@ -170,7 +172,7 @@ export function RunList({ runs }: RunListProps) {
         </Select>
 
         <Select value={filterTier} onValueChange={(v) => { if (v) setFilterTier(v); }}>
-          <SelectTrigger size="sm" className="w-32">
+          <SelectTrigger size="sm" className="w-32" aria-label="Filter by tier">
             <SelectValue placeholder="Tier" />
           </SelectTrigger>
           <SelectContent>
@@ -182,7 +184,7 @@ export function RunList({ runs }: RunListProps) {
         </Select>
 
         <Select value={filterGate} onValueChange={(v) => { if (v) setFilterGate(v); }}>
-          <SelectTrigger size="sm" className="w-40">
+          <SelectTrigger size="sm" className="w-40" aria-label="Filter by gate result">
             <SelectValue placeholder="Gate result" />
           </SelectTrigger>
           <SelectContent>
@@ -194,7 +196,7 @@ export function RunList({ runs }: RunListProps) {
         </Select>
 
         <Select value={filterSource} onValueChange={(v) => { if (v) setFilterSource(v); }}>
-          <SelectTrigger size="sm" className="w-32">
+          <SelectTrigger size="sm" className="w-32" aria-label="Filter by source">
             <SelectValue placeholder="Source" />
           </SelectTrigger>
           <SelectContent>
@@ -207,9 +209,11 @@ export function RunList({ runs }: RunListProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8 text-center">
-          No runs found.
-        </p>
+        <EmptyState
+          icon={BarChart3}
+          title="No runs found"
+          description="Import an eval run or adjust your filters."
+        />
       ) : (
         <>
         <Table>
@@ -271,6 +275,8 @@ export function RunList({ runs }: RunListProps) {
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      title="View"
+                      aria-label="View"
                       render={<Link href={`/runs/${run.id}`} />}
                     >
                       <Eye className="size-3.5" />
@@ -279,6 +285,8 @@ export function RunList({ runs }: RunListProps) {
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      title="Delete"
+                      aria-label="Delete"
                       onClick={() => setDeleteTarget(run)}
                       className="text-destructive hover:text-destructive"
                     >

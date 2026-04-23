@@ -11,6 +11,8 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
+import { CheckCircle2 as CheckCircle2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,9 +84,11 @@ export function DisagreementList({ sessionId, disagreements }: DisagreementListP
 
   if (disagreements.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">
-        No disagreements found. All annotators agreed on all fields.
-      </p>
+      <EmptyState
+        icon={CheckCircle2Icon}
+        title="No disagreements"
+        description="All annotations are in agreement."
+      />
     );
   }
 

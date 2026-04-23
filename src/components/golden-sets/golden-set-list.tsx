@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { CaseStatusBadge } from "./case-status-badge";
-import { Pencil, Trash2, Download, Search } from "lucide-react";
+import { Pencil, Trash2, Download, Search, Database } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format-date";
 
@@ -115,10 +116,11 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 w-[200px]"
+            aria-label="Search"
           />
         </div>
         <Select value={filterSkill} onValueChange={(v) => setFilterSkill(v ?? "all")}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[200px]" aria-label="Filter by skill">
             <SelectValue placeholder="All skills" />
           </SelectTrigger>
           <SelectContent>
@@ -132,7 +134,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
         </Select>
 
         <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v ?? "all")}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-[160px]" aria-label="Filter by status">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -171,8 +173,12 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-10">
-                  No golden sets found.
+                <TableCell colSpan={6}>
+                  <EmptyState
+                    icon={Database}
+                    title="No golden sets found"
+                    description="Create a golden set or adjust your filters."
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -212,6 +218,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
                         variant="ghost"
                         size="icon"
                         title="Edit"
+                        aria-label="Edit"
                         render={<Link href={`/golden-sets/${gs.id}/edit`} />}
                       >
                         <Pencil className="size-3.5" />
@@ -220,6 +227,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
                         variant="ghost"
                         size="icon"
                         title="Export"
+                        aria-label="Export"
                         render={<a href={`/api/golden-sets/${gs.id}/export`} download />}
                       >
                         <Download className="size-3.5" />
@@ -228,6 +236,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
                         variant="ghost"
                         size="icon"
                         title="Delete"
+                        aria-label="Delete"
                         disabled={gs.status !== "draft"}
                         onClick={() => handleDelete(gs.id, gs.name)}
                       >

@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Pencil, Trash2, Eye, Search, Shield } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { useSortable } from "@/hooks/use-sortable";
@@ -130,10 +131,11 @@ export function ConventionList({ initialData }: ConventionListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 w-[200px]"
+            aria-label="Search"
           />
         </div>
         <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v ?? "all")}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px]" aria-label="Filter by category">
             <SelectValue placeholder="All categories" />
           </SelectTrigger>
           <SelectContent>
@@ -145,7 +147,7 @@ export function ConventionList({ initialData }: ConventionListProps) {
         </Select>
 
         <Select value={filterSeverity} onValueChange={(v) => setFilterSeverity(v ?? "all")}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[150px]" aria-label="Filter by severity">
             <SelectValue placeholder="All severities" />
           </SelectTrigger>
           <SelectContent>
@@ -191,8 +193,12 @@ export function ConventionList({ initialData }: ConventionListProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-10">
-                  No convention rules found.
+                <TableCell colSpan={7}>
+                  <EmptyState
+                    icon={Shield}
+                    title="No conventions found"
+                    description="Import convention rules or adjust your filters."
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -238,6 +244,7 @@ export function ConventionList({ initialData }: ConventionListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="View"
+                        aria-label="View"
                         render={<Link href={`/conventions/${r.id}`} />}
                       >
                         <Eye className="size-3.5" />
@@ -246,6 +253,7 @@ export function ConventionList({ initialData }: ConventionListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="Edit"
+                        aria-label="Edit"
                         render={<Link href={`/conventions/${r.id}/edit`} />}
                       >
                         <Pencil className="size-3.5" />
@@ -254,6 +262,7 @@ export function ConventionList({ initialData }: ConventionListProps) {
                         variant="ghost"
                         size="icon-sm"
                         title="Delete"
+                        aria-label="Delete"
                         onClick={() => handleDelete(r.id, r.name)}
                         className="text-destructive hover:text-destructive"
                       >

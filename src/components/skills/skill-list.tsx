@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Pencil, Trash2, Eye, Search, BookOpen } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { useSortable } from "@/hooks/use-sortable";
@@ -132,9 +133,11 @@ export function SkillList({ skills }: SkillListProps) {
 
   if (skills.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">
-        No skills found.
-      </p>
+      <EmptyState
+        icon={BookOpen}
+        title="No skills found"
+        description="Create a skill to get started."
+      />
     );
   }
 
@@ -149,11 +152,12 @@ export function SkillList({ skills }: SkillListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 w-[200px]"
+            aria-label="Search"
           />
         </div>
 
         <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v ?? "all")}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[140px]" aria-label="Filter by status">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -165,7 +169,7 @@ export function SkillList({ skills }: SkillListProps) {
         </Select>
 
         <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v ?? "all")}>
-          <SelectTrigger className="w-[130px]">
+          <SelectTrigger className="w-[130px]" aria-label="Filter by priority">
             <SelectValue placeholder="All priorities" />
           </SelectTrigger>
           <SelectContent>
@@ -243,6 +247,8 @@ export function SkillList({ skills }: SkillListProps) {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    title="View"
+                    aria-label="View"
                     render={<Link href={`/skills/${skill.id}`} />}
                   >
                     <Eye className="size-3.5" />
@@ -251,6 +257,8 @@ export function SkillList({ skills }: SkillListProps) {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    title="Edit"
+                    aria-label="Edit"
                     render={<Link href={`/skills/${skill.id}/edit`} />}
                   >
                     <Pencil className="size-3.5" />
@@ -259,6 +267,8 @@ export function SkillList({ skills }: SkillListProps) {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    title="Delete"
+                    aria-label="Delete"
                     onClick={() => setDeleteTarget(skill)}
                     className="text-destructive hover:text-destructive"
                   >
