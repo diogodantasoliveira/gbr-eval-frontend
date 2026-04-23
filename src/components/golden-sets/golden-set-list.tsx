@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
+import { useSortable } from "@/hooks/use-sortable";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -22,8 +25,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { CaseStatusBadge } from "./case-status-badge";
-import { Pencil, Trash2, Download } from "lucide-react";
+import { Pencil, Trash2, Download, Search } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format-date";
 
 interface GoldenSet {
   id: string;
@@ -46,10 +50,20 @@ interface GoldenSetListProps {
   initialData: GoldenSet[];
 }
 
+const gsAccessors = {
+  name: (gs: GoldenSet) => gs.name,
+  doc_type: (gs: GoldenSet) => gs.skill_doc_type,
+  case_count: (gs: GoldenSet) => gs.case_count,
+  created_at: (gs: GoldenSet) => gs.created_at,
+} as const;
+
+type GsSortKey = keyof typeof gsAccessors;
+
 export function GoldenSetList({ initialData }: GoldenSetListProps) {
   const router = useRouter();
   const [data, setData] = useState<GoldenSet[]>(initialData);
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [search, setSearch] = useState("");
   const [filterSkill, setFilterSkill] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
@@ -60,13 +74,23 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
       .catch(() => {});
   }, []);
 
-  const filtered = data.filter((gs) => {
+  const searched = useMemo(() => {
+    if (!search) return data;
+    const q = search.toLowerCase();
+    return data.filter((gs) =>
+      gs.name.toLowerCase().includes(q) ||
+      (gs.skill_doc_type?.toLowerCase().includes(q) ?? false)
+    );
+  }, [data, search]);
+
+  const filtered = searched.filter((gs) => {
     if (filterSkill !== "all" && gs.skill_id !== filterSkill) return false;
     if (filterStatus !== "all" && gs.status !== filterStatus) return false;
     return true;
   });
 
-  const { page, pageCount, paginatedItems, onPageChange } = usePagination(filtered);
+  const { sorted, sort, onSort } = useSortable<GoldenSet, GsSortKey>(filtered, gsAccessors);
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(sorted);
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete golden set "${name}"? This cannot be undone.`)) return;
@@ -83,7 +107,16 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search golden sets..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-[200px]"
+          />
+        </div>
         <Select value={filterSkill} onValueChange={(v) => setFilterSkill(v ?? "all")}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="All skills" />
@@ -127,11 +160,11 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Skill</TableHead>
-              <TableHead className="text-right">Cases</TableHead>
+              <SortableHead active={sort?.key === "name"} direction={sort?.key === "name" ? sort.direction : null} onClick={() => onSort("name")}>Name</SortableHead>
+              <SortableHead active={sort?.key === "doc_type"} direction={sort?.key === "doc_type" ? sort.direction : null} onClick={() => onSort("doc_type")}>Skill</SortableHead>
+              <SortableHead active={sort?.key === "case_count"} direction={sort?.key === "case_count" ? sort.direction : null} onClick={() => onSort("case_count")} className="text-right">Cases</SortableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
+              <SortableHead active={sort?.key === "created_at"} direction={sort?.key === "created_at" ? sort.direction : null} onClick={() => onSort("created_at")}>Created</SortableHead>
               <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -171,7 +204,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
                     <CaseStatusBadge status={gs.status} />
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">
-                    {new Date(gs.created_at).toLocaleDateString("pt-BR")}
+                    {formatDate(gs.created_at)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">

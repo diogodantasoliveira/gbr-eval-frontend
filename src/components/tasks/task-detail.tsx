@@ -12,6 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { YamlPreview } from "./yaml-preview";
 import { EVAL_CHECKLIST_QUESTIONS, type EvalChecklist } from "@/lib/validations/task";
+import { formatDateTime } from "@/lib/format-date";
 
 interface GraderItem {
   id: string;
@@ -155,13 +156,13 @@ export function TaskDetailView({ task }: TaskDetailProps) {
             <div>
               <dt className="text-muted-foreground">Created</dt>
               <dd className="mt-0.5 text-xs tabular-nums">
-                {new Date(task.created_at).toLocaleString("pt-BR")}
+                {formatDateTime(task.created_at)}
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Updated</dt>
               <dd className="mt-0.5 text-xs tabular-nums">
-                {new Date(task.updated_at).toLocaleString("pt-BR")}
+                {formatDateTime(task.updated_at)}
               </dd>
             </div>
           </dl>

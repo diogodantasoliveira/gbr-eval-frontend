@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/format-date";
 
 interface Alert {
   id: string;
@@ -119,7 +120,7 @@ export function AlertPanel() {
             </div>
             <p className="text-sm text-foreground">{alert.description}</p>
             <p className="text-xs text-muted-foreground">
-              {new Date(alert.timestamp).toLocaleString()}
+              {formatDateTime(alert.timestamp)}
             </p>
           </div>
           <Button

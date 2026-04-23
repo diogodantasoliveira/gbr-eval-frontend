@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format-date";
 
 interface ConcordanceTest {
   id: string;
@@ -177,7 +178,7 @@ export function ConcordancePanel({
                       </span>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {new Date(t.created_at).toLocaleDateString()}
+                      {formatDate(t.created_at)}
                     </TableCell>
                   </TableRow>
                 );

@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { formatDateTime } from "@/lib/format-date";
 
 interface Session {
   id: string;
@@ -133,7 +134,7 @@ export function SessionList({ sessions }: SessionListProps) {
                 )}
               </TableCell>
               <TableCell className="text-muted-foreground text-xs">
-                {new Date(session.started_at).toLocaleDateString()}
+                {formatDateTime(session.started_at)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">

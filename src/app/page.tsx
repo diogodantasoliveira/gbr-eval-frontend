@@ -3,7 +3,6 @@ import {
   BookOpen,
   Database,
   ListChecks,
-  ScrollText,
   BarChart3,
   FileJson,
   Shield,
@@ -22,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertPanel } from "@/components/alerts/alert-panel";
+import { cn } from "@/lib/utils";
+import { timeAgo } from "@/lib/format-date";
 import { db } from "@/db";
 import {
   skills,
@@ -79,12 +80,12 @@ export default async function DashboardPage() {
     .limit(1)
     .get();
 
-  // Recent 5 runs
+  // Recent 10 runs
   const recentRuns = db
     .select()
     .from(eval_runs)
     .orderBy(desc(eval_runs.imported_at))
-    .limit(5)
+    .limit(10)
     .all();
 
   const coveragePct =
@@ -217,7 +218,7 @@ export default async function DashboardPage() {
                   </Badge>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="size-3" />
-                    {new Date(run.imported_at).toLocaleDateString()}
+                    {timeAgo(run.imported_at)}
                   </span>
                 </div>
               </Link>
@@ -226,30 +227,47 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Quick links */}
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">Quick Links</h2>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {[
-            { label: "Skills", href: "/skills", icon: BookOpen },
-            { label: "Golden Sets", href: "/golden-sets", icon: Database },
-            { label: "Tasks", href: "/tasks", icon: ListChecks },
-            { label: "Rubrics", href: "/rubrics", icon: ScrollText },
-            { label: "Runs", href: "/runs", icon: BarChart3 },
-            { label: "Contracts", href: "/contracts", icon: FileJson },
-            { label: "Conventions", href: "/conventions", icon: Shield },
-          ].map(({ label, href, icon: Icon }) => (
+      {/* Score trend */}
+      {recentRuns.length >= 2 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-foreground">Score Trend</h2>
             <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-2 rounded-md border border-border px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+              href="/runs"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Icon className="size-4 text-muted-foreground" />
-              {label}
+              All runs <ArrowRight className="size-3" />
             </Link>
-          ))}
+          </div>
+          <div className="rounded-xl border bg-card p-4">
+            <div className="flex items-end gap-1" style={{ height: "80px" }}>
+              {recentRuns.slice().reverse().map((run) => {
+                const pct = Math.round(run.overall_score * 100);
+                const h = Math.max(4, Math.round(run.overall_score * 72));
+                const color = run.overall_score >= 0.9
+                  ? "bg-green-500 dark:bg-green-400"
+                  : run.overall_score >= 0.7
+                  ? "bg-amber-500 dark:bg-amber-400"
+                  : "bg-red-500 dark:bg-red-400";
+                return (
+                  <Link
+                    key={run.id}
+                    href={`/runs/${run.id}`}
+                    className="group relative flex flex-1 flex-col items-center justify-end"
+                    style={{ height: "80px" }}
+                    title={`${run.run_id}: ${pct}%`}
+                  >
+                    <div className={cn("w-full rounded-t transition-opacity group-hover:opacity-80", color)} style={{ height: `${h}px` }} />
+                    <span className="text-[9px] text-muted-foreground mt-1 truncate max-w-[50px]">
+                      {timeAgo(run.imported_at)}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

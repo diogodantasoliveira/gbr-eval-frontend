@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,8 +55,14 @@ export function ConventionEditForm({ conventionId, initialData }: ConventionEdit
     detection_pattern: initialData.detection_pattern,
     source: initialData.source,
   });
+  const initialRef = useRef(form)
   const [positiveExample, setPositiveExample] = useState(initialData.positive_example);
   const [negativeExample, setNegativeExample] = useState(initialData.negative_example);
+  const isDirty =
+    JSON.stringify(form) !== JSON.stringify(initialRef.current) ||
+    positiveExample !== initialData.positive_example ||
+    negativeExample !== initialData.negative_example
+  useUnsavedChanges(isDirty)
 
   function handleChange(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));

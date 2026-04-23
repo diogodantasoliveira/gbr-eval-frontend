@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,6 +110,9 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
     ...emptyState(),
     ...initialTask,
   }));
+  const initialRef = useRef(state)
+  const isDirty = JSON.stringify(state) !== JSON.stringify(initialRef.current)
+  useUnsavedChanges(isDirty)
   const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [skills, setSkills] = useState<Array<{ id: string; name: string }>>([]);

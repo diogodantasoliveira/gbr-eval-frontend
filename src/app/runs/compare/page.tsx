@@ -11,6 +11,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { RunDiff } from "@/components/runs/run-diff";
+import { PassFailBarChart } from "@/components/charts/pass-fail-bar-chart";
+import { ScoreLineChart } from "@/components/charts/score-line-chart";
 import { useSearchParams } from "next/navigation";
 
 interface EvalRun {
@@ -141,12 +143,55 @@ function CompareContent() {
       )}
 
       {result && (
-        <RunDiff
-          runA={result.run_a}
-          runB={result.run_b}
-          tasks={result.tasks}
-          summary={result.summary}
-        />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-3">Score Comparison</p>
+              <ScoreLineChart
+                data={[
+                  {
+                    label: `A: ${result.run_a.run_id.slice(0, 8)}`,
+                    score: result.run_a.overall_score,
+                    run_id: result.run_a.run_id,
+                  },
+                  {
+                    label: `B: ${result.run_b.run_id.slice(0, 8)}`,
+                    score: result.run_b.overall_score,
+                    run_id: result.run_b.run_id,
+                  },
+                ]}
+                height={200}
+              />
+            </div>
+            <div className="rounded-xl border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-3">Pass / Fail Breakdown</p>
+              <PassFailBarChart
+                data={[
+                  {
+                    label: `A: ${result.run_a.run_id.slice(0, 8)}`,
+                    passed: result.tasks.filter((t) => t.a?.passed).length,
+                    failed: result.tasks.filter((t) => t.a && !t.a.passed).length,
+                    total: result.tasks.filter((t) => t.a).length,
+                  },
+                  {
+                    label: `B: ${result.run_b.run_id.slice(0, 8)}`,
+                    passed: result.tasks.filter((t) => t.b?.passed).length,
+                    failed: result.tasks.filter((t) => t.b && !t.b.passed).length,
+                    total: result.tasks.filter((t) => t.b).length,
+                  },
+                ]}
+                height={200}
+              />
+            </div>
+          </div>
+
+          <RunDiff
+            runA={result.run_a}
+            runB={result.run_b}
+            tasks={result.tasks}
+            summary={result.summary}
+          />
+        </>
       )}
     </div>
   );

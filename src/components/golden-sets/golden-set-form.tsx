@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,9 @@ export function GoldenSetForm({ mode, initialData }: GoldenSetFormProps) {
     name: initialData?.name ?? "",
     description: initialData?.description ?? "",
   });
+  const initialRef = useRef(form)
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialRef.current)
+  useUnsavedChanges(isDirty)
 
   useEffect(() => {
     fetch("/api/skills")

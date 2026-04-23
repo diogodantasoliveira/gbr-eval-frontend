@@ -21,6 +21,7 @@ import {
 import { CaseStatusBadge } from "./case-status-badge";
 import { TagBadge } from "@/components/tags/tag-badge";
 import { Pencil, Clock, Plus } from "lucide-react";
+import { formatDate } from "@/lib/format-date";
 
 interface GoldenSetCase {
   id: string;
@@ -150,7 +151,7 @@ export function CaseList({ goldenSetId, cases: initialCases }: CaseListProps) {
                     {c.annotator || "—"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">
-                    {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                    {formatDate(c.created_at)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,9 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
     priority: initialData?.priority ?? "P1",
     status: initialData?.status ?? "active",
   });
+  const initialRef = useRef(form)
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialRef.current)
+  useUnsavedChanges(isDirty)
 
   function handleChange(field: keyof SkillFormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));

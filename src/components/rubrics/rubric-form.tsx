@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +62,9 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
     model: initialData?.model ?? "claude-sonnet-4-5-20250514",
     status: initialData?.status ?? "draft",
   });
+  const initialRef = useRef(form)
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialRef.current)
+  useUnsavedChanges(isDirty)
   const [changeReason, setChangeReason] = useState("");
 
   function handleChange(field: keyof RubricFormData, value: string) {

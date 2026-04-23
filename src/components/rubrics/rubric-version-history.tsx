@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatDateTime } from "@/lib/format-date";
 
 interface RubricVersion {
   id: string;
@@ -19,16 +20,6 @@ interface RubricVersion {
 interface RubricVersionHistoryProps {
   versions: RubricVersion[];
   currentVersion: number;
-}
-
-function formatDate(ms: number): string {
-  return new Date(ms).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function RubricVersionHistory({ versions, currentVersion }: RubricVersionHistoryProps) {
@@ -85,7 +76,7 @@ export function RubricVersionHistory({ versions, currentVersion }: RubricVersion
                 <dl className="space-y-1 text-xs">
                   <div className="flex gap-2">
                     <dt className="text-muted-foreground w-24 shrink-0">Changed at</dt>
-                    <dd className="font-mono">{formatDate(v.changed_at)}</dd>
+                    <dd className="font-mono">{formatDateTime(v.changed_at)}</dd>
                   </div>
                   <div className="flex gap-2">
                     <dt className="text-muted-foreground w-24 shrink-0">Changed by</dt>
@@ -116,7 +107,7 @@ export function RubricVersionHistory({ versions, currentVersion }: RubricVersion
             </pre>
           </div>
           <div className="text-xs text-muted-foreground">
-            Saved {viewing ? formatDate(viewing.changed_at) : ""} by {viewing?.changed_by}
+            Saved {viewing ? formatDateTime(viewing.changed_at) : ""} by {viewing?.changed_by}
           </div>
         </DialogContent>
       </Dialog>

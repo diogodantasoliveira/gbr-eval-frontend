@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SchemaViewer } from "./schema-viewer";
 import { SchemaDiff } from "./schema-diff";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/format-date";
 
 export interface ContractVersion {
   id: string;
@@ -23,16 +24,6 @@ interface ContractVersionHistoryProps {
   currentVersion: number;
   currentSchema: Record<string, unknown>;
   initialVersions: ContractVersion[];
-}
-
-function formatDate(ts: number): string {
-  return new Date(ts).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function ContractVersionHistory({
@@ -106,7 +97,7 @@ export function ContractVersionHistory({
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-foreground">{formatDate(v.imported_at)}</div>
+              <div className="text-xs text-foreground">{formatDateTime(v.imported_at)}</div>
               <div className="text-[10px] text-muted-foreground">
                 by {v.imported_by}
               </div>

@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, Search } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
+import { useSortable } from "@/hooks/use-sortable";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableHeader,
@@ -77,10 +80,20 @@ function scoreColor(score: number): string {
   return "text-red-600 dark:text-red-400";
 }
 
+const runAccessors = {
+  run_id: (r: EvalRun) => r.run_id,
+  overall_score: (r: EvalRun) => r.overall_score,
+  tasks_passed: (r: EvalRun) => r.tasks_passed / (r.tasks_total || 1),
+  imported_at: (r: EvalRun) => r.imported_at,
+} as const;
+
+type RunSortKey = keyof typeof runAccessors;
+
 export function RunList({ runs }: RunListProps) {
   const router = useRouter();
   const [deleteTarget, setDeleteTarget] = useState<EvalRun | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [search, setSearch] = useState("");
   const [filterLayer, setFilterLayer] = useState("all");
   const [filterTier, setFilterTier] = useState("all");
   const [filterGate, setFilterGate] = useState("all");
@@ -91,7 +104,15 @@ export function RunList({ runs }: RunListProps) {
   const gates = Array.from(new Set(runs.map((r) => r.gate_result).filter(Boolean) as string[]));
   const sources = Array.from(new Set(runs.map((r) => r.source)));
 
-  const filtered = runs.filter((r) => {
+  const searched = useMemo(() => {
+    if (!search) return runs;
+    const q = search.toLowerCase();
+    return runs.filter((r) =>
+      r.run_id.toLowerCase().includes(q) || r.source.toLowerCase().includes(q)
+    );
+  }, [runs, search]);
+
+  const filtered = searched.filter((r) => {
     if (filterLayer !== "all" && r.layer !== filterLayer) return false;
     if (filterTier !== "all" && r.tier !== filterTier) return false;
     if (filterGate !== "all" && r.gate_result !== filterGate) return false;
@@ -99,7 +120,8 @@ export function RunList({ runs }: RunListProps) {
     return true;
   });
 
-  const { page, pageCount, paginatedItems, onPageChange } = usePagination(filtered);
+  const { sorted, sort, onSort } = useSortable<EvalRun, RunSortKey>(filtered, runAccessors);
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(sorted);
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -125,6 +147,15 @@ export function RunList({ runs }: RunListProps) {
     <>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 pb-4">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search runs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-[200px]"
+          />
+        </div>
         <span className="text-xs text-muted-foreground self-center">{filtered.length} runs</span>
         <Select value={filterLayer} onValueChange={(v) => { if (v) setFilterLayer(v); }}>
           <SelectTrigger size="sm" className="w-32">
@@ -184,14 +215,14 @@ export function RunList({ runs }: RunListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Run ID</TableHead>
+              <SortableHead active={sort?.key === "run_id"} direction={sort?.key === "run_id" ? sort.direction : null} onClick={() => onSort("run_id")}>Run ID</SortableHead>
               <TableHead>Layer</TableHead>
               <TableHead>Tier</TableHead>
-              <TableHead>Score</TableHead>
+              <SortableHead active={sort?.key === "overall_score"} direction={sort?.key === "overall_score" ? sort.direction : null} onClick={() => onSort("overall_score")}>Score</SortableHead>
               <TableHead>Gate</TableHead>
-              <TableHead>Tasks</TableHead>
+              <SortableHead active={sort?.key === "tasks_passed"} direction={sort?.key === "tasks_passed" ? sort.direction : null} onClick={() => onSort("tasks_passed")}>Tasks</SortableHead>
               <TableHead>Source</TableHead>
-              <TableHead>Date</TableHead>
+              <SortableHead active={sort?.key === "imported_at"} direction={sort?.key === "imported_at" ? sort.direction : null} onClick={() => onSort("imported_at")}>Date</SortableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>

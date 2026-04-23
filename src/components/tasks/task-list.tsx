@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye, Download } from "lucide-react";
+import { Pencil, Trash2, Eye, Download, Search } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
+import { useSortable } from "@/hooks/use-sortable";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -68,21 +71,43 @@ function tierVariant(t: string): "default" | "outline" | "secondary" {
   return "outline";
 }
 
+const taskAccessors = {
+  task_id: (t: TaskRow) => t.task_id,
+  category: (t: TaskRow) => t.category,
+  layer: (t: TaskRow) => t.layer,
+  tier: (t: TaskRow) => t.tier,
+  status: (t: TaskRow) => t.status,
+  pass_threshold: (t: TaskRow) => t.pass_threshold,
+} as const;
+
+type TaskSortKey = keyof typeof taskAccessors;
+
 export function TaskList({ initialData }: TaskListProps) {
   const router = useRouter();
   const [data, setData] = useState<TaskRow[]>(initialData);
+  const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterLayer, setFilterLayer] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const filtered = data.filter((t) => {
+  const searched = useMemo(() => {
+    if (!search) return data;
+    const q = search.toLowerCase();
+    return data.filter((t) =>
+      t.task_id.toLowerCase().includes(q) ||
+      (t.description?.toLowerCase().includes(q) ?? false)
+    );
+  }, [data, search]);
+
+  const filtered = searched.filter((t) => {
     if (filterCategory !== "all" && t.category !== filterCategory) return false;
     if (filterLayer !== "all" && t.layer !== filterLayer) return false;
     if (filterStatus !== "all" && t.status !== filterStatus) return false;
     return true;
   });
 
-  const { page, pageCount, paginatedItems, onPageChange } = usePagination(filtered);
+  const { sorted, sort, onSort } = useSortable<TaskRow, TaskSortKey>(filtered, taskAccessors);
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(sorted);
 
   async function handleDelete(id: string, taskId: string) {
     if (!confirm(`Delete task "${taskId}"? This cannot be undone.`)) return;
@@ -100,6 +125,15 @@ export function TaskList({ initialData }: TaskListProps) {
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search tasks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-[200px]"
+          />
+        </div>
         <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v ?? "all")}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All categories" />
@@ -156,12 +190,12 @@ export function TaskList({ initialData }: TaskListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Task ID</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Layer</TableHead>
-              <TableHead>Tier</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Pass Threshold</TableHead>
+              <SortableHead active={sort?.key === "task_id"} direction={sort?.key === "task_id" ? sort.direction : null} onClick={() => onSort("task_id")}>Task ID</SortableHead>
+              <SortableHead active={sort?.key === "category"} direction={sort?.key === "category" ? sort.direction : null} onClick={() => onSort("category")}>Category</SortableHead>
+              <SortableHead active={sort?.key === "layer"} direction={sort?.key === "layer" ? sort.direction : null} onClick={() => onSort("layer")}>Layer</SortableHead>
+              <SortableHead active={sort?.key === "tier"} direction={sort?.key === "tier" ? sort.direction : null} onClick={() => onSort("tier")}>Tier</SortableHead>
+              <SortableHead active={sort?.key === "status"} direction={sort?.key === "status" ? sort.direction : null} onClick={() => onSort("status")}>Status</SortableHead>
+              <SortableHead active={sort?.key === "pass_threshold"} direction={sort?.key === "pass_threshold" ? sort.direction : null} onClick={() => onSort("pass_threshold")} className="text-right">Pass Threshold</SortableHead>
               <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>

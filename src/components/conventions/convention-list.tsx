@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
+import { usePagination } from "@/hooks/use-pagination";
+import { useSortable } from "@/hooks/use-sortable";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -69,17 +74,37 @@ function detectionVariant(d: string): "default" | "outline" | "secondary" {
   return "outline";
 }
 
+const conventionAccessors = {
+  name: (r: ConventionRow) => r.name,
+  category: (r: ConventionRow) => r.category,
+  severity: (r: ConventionRow) => r.severity,
+  detection_type: (r: ConventionRow) => r.detection_type,
+  status: (r: ConventionRow) => r.status,
+} as const;
+
+type ConventionSortKey = keyof typeof conventionAccessors;
+
 export function ConventionList({ initialData }: ConventionListProps) {
   const router = useRouter();
   const [data, setData] = useState<ConventionRow[]>(initialData);
+  const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterSeverity, setFilterSeverity] = useState("all");
 
-  const filtered = data.filter((r) => {
+  const searched = useMemo(() => {
+    if (!search) return data;
+    const q = search.toLowerCase();
+    return data.filter((r) => r.name.toLowerCase().includes(q));
+  }, [data, search]);
+
+  const filtered = searched.filter((r) => {
     if (filterCategory !== "all" && r.category !== filterCategory) return false;
     if (filterSeverity !== "all" && r.severity !== filterSeverity) return false;
     return true;
   });
+
+  const { sorted, sort, onSort } = useSortable<ConventionRow, ConventionSortKey>(filtered, conventionAccessors);
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(sorted);
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete convention rule "${name}"? This cannot be undone.`)) return;
@@ -98,6 +123,15 @@ export function ConventionList({ initialData }: ConventionListProps) {
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search conventions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-[200px]"
+          />
+        </div>
         <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v ?? "all")}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All categories" />
@@ -145,12 +179,12 @@ export function ConventionList({ initialData }: ConventionListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Severity</TableHead>
-              <TableHead>Detection</TableHead>
+              <SortableHead active={sort?.key === "name"} direction={sort?.key === "name" ? sort.direction : null} onClick={() => onSort("name")}>Name</SortableHead>
+              <SortableHead active={sort?.key === "category"} direction={sort?.key === "category" ? sort.direction : null} onClick={() => onSort("category")}>Category</SortableHead>
+              <SortableHead active={sort?.key === "severity"} direction={sort?.key === "severity" ? sort.direction : null} onClick={() => onSort("severity")}>Severity</SortableHead>
+              <SortableHead active={sort?.key === "detection_type"} direction={sort?.key === "detection_type" ? sort.direction : null} onClick={() => onSort("detection_type")}>Detection</SortableHead>
               <TableHead>Source</TableHead>
-              <TableHead>Status</TableHead>
+              <SortableHead active={sort?.key === "status"} direction={sort?.key === "status" ? sort.direction : null} onClick={() => onSort("status")}>Status</SortableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -162,7 +196,7 @@ export function ConventionList({ initialData }: ConventionListProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((r) => (
+              paginatedItems.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell>
                     <Link
@@ -233,6 +267,7 @@ export function ConventionList({ initialData }: ConventionListProps) {
           </TableBody>
         </Table>
       </div>
+      <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
     </div>
   );
 }

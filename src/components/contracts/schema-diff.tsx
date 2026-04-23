@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/format-date";
 
 interface SchemaDiffProps {
   oldSchema: Record<string, unknown>;
@@ -86,13 +87,9 @@ function formatValue(v: unknown): string {
   return String(v);
 }
 
-function formatDate(ts: number | undefined): string {
+function formatDateOptional(ts: number | undefined): string {
   if (!ts) return "";
-  return new Date(ts).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatDate(ts);
 }
 
 export function SchemaDiff({
@@ -115,7 +112,7 @@ export function SchemaDiff({
             v{oldVersion}
           </span>
           {oldDate && (
-            <span className="ml-2 text-muted-foreground/60">{formatDate(oldDate)}</span>
+            <span className="ml-2 text-muted-foreground/60">{formatDateOptional(oldDate)}</span>
           )}
         </div>
         <div className="px-3 py-2 bg-muted/40">
@@ -123,7 +120,7 @@ export function SchemaDiff({
             v{newVersion}
           </span>
           {newDate && (
-            <span className="ml-2 text-muted-foreground/60">{formatDate(newDate)}</span>
+            <span className="ml-2 text-muted-foreground/60">{formatDateOptional(newDate)}</span>
           )}
         </div>
       </div>

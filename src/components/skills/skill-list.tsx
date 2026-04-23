@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, Search } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/use-pagination";
+import { useSortable } from "@/hooks/use-sortable";
+import { SortableHead } from "@/components/ui/sortable-head";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableHeader,
@@ -15,6 +18,13 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,11 +65,44 @@ function priorityClass(priority: string): string {
   return "";
 }
 
+const STATUSES = ["active", "draft", "deprecated"];
+const PRIORITIES = ["P0", "P1", "P2", "P3"];
+
+const skillAccessors = {
+  name: (s: Skill) => s.name,
+  doc_type: (s: Skill) => s.doc_type,
+  version: (s: Skill) => s.version,
+  priority: (s: Skill) => s.priority,
+  status: (s: Skill) => s.status,
+} as const;
+
+type SkillSortKey = keyof typeof skillAccessors;
+
 export function SkillList({ skills }: SkillListProps) {
   const router = useRouter();
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const { page, pageCount, paginatedItems, onPageChange } = usePagination(skills);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
+
+  const searched = useMemo(() => {
+    if (!search) return skills;
+    const q = search.toLowerCase();
+    return skills.filter((s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.doc_type.toLowerCase().includes(q)
+    );
+  }, [skills, search]);
+
+  const filtered = searched.filter((s) => {
+    if (filterStatus !== "all" && s.status !== filterStatus) return false;
+    if (filterPriority !== "all" && s.priority !== filterPriority) return false;
+    return true;
+  });
+
+  const { sorted, sort, onSort } = useSortable<Skill, SkillSortKey>(filtered, skillAccessors);
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(sorted);
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -96,15 +139,66 @@ export function SkillList({ skills }: SkillListProps) {
   }
 
   return (
-    <>
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3 pb-4">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search skills..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 w-[200px]"
+          />
+        </div>
+
+        <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v ?? "all")}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="All statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            {STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v ?? "all")}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="All priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All priorities</SelectItem>
+            {PRIORITIES.map((p) => (
+              <SelectItem key={p} value={p}>{p}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {(filterStatus !== "all" || filterPriority !== "all") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setFilterStatus("all"); setFilterPriority("all"); }}
+          >
+            Clear filters
+          </Button>
+        )}
+
+        <span className="ml-auto text-xs text-muted-foreground">
+          {filtered.length} of {skills.length} skills
+        </span>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Doc Type</TableHead>
-            <TableHead>Version</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Status</TableHead>
+            <SortableHead active={sort?.key === "name"} direction={sort?.key === "name" ? sort.direction : null} onClick={() => onSort("name")}>Name</SortableHead>
+            <SortableHead active={sort?.key === "doc_type"} direction={sort?.key === "doc_type" ? sort.direction : null} onClick={() => onSort("doc_type")}>Doc Type</SortableHead>
+            <SortableHead active={sort?.key === "version"} direction={sort?.key === "version" ? sort.direction : null} onClick={() => onSort("version")}>Version</SortableHead>
+            <SortableHead active={sort?.key === "priority"} direction={sort?.key === "priority" ? sort.direction : null} onClick={() => onSort("priority")}>Priority</SortableHead>
+            <SortableHead active={sort?.key === "status"} direction={sort?.key === "status" ? sort.direction : null} onClick={() => onSort("status")}>Status</SortableHead>
             <TableHead>Fields</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -210,6 +304,6 @@ export function SkillList({ skills }: SkillListProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
