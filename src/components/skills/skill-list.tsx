@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
+import { usePagination } from "@/hooks/use-pagination";
 import {
   Table,
   TableHeader,
@@ -57,6 +59,7 @@ export function SkillList({ skills }: SkillListProps) {
   const router = useRouter();
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(skills);
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -107,7 +110,7 @@ export function SkillList({ skills }: SkillListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {skills.map((skill) => (
+          {paginatedItems.map((skill) => (
             <TableRow key={skill.id}>
               <TableCell className="font-medium">
                 <Link
@@ -174,6 +177,7 @@ export function SkillList({ skills }: SkillListProps) {
           ))}
         </TableBody>
       </Table>
+      <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
 
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>

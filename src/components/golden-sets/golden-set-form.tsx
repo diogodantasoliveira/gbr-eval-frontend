@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/ui/form-field";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ export function GoldenSetForm({ mode, initialData }: GoldenSetFormProps) {
   const router = useRouter();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
     skill_id: initialData?.skill_id ?? "",
@@ -49,12 +51,28 @@ export function GoldenSetForm({ mode, initialData }: GoldenSetFormProps) {
       .catch(() => toast.error("Failed to load skills"));
   }, []);
 
+  function handleChange(field: keyof typeof form, value: string) {
+    setForm((f) => ({ ...f, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  function validate(): boolean {
+    const newErrors: Record<string, string> = {};
+    if (!form.skill_id) newErrors.skill_id = "Please select a skill";
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.skill_id) {
-      toast.error("Please select a skill");
-      return;
-    }
+    if (!validate()) return;
     setLoading(true);
 
     try {
@@ -94,14 +112,14 @@ export function GoldenSetForm({ mode, initialData }: GoldenSetFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-w-lg">
-      <div className="space-y-1.5">
+      <FormField error={errors.skill_id}>
         <Label htmlFor="skill_id">Skill</Label>
         <Select
           value={form.skill_id}
-          onValueChange={(v) => setForm((f) => ({ ...f, skill_id: v ?? f.skill_id }))}
+          onValueChange={(v) => handleChange("skill_id", v ?? form.skill_id)}
           disabled={mode === "edit"}
         >
-          <SelectTrigger id="skill_id">
+          <SelectTrigger id="skill_id" aria-invalid={!!errors.skill_id}>
             <SelectValue placeholder="Select a skill..." />
           </SelectTrigger>
           <SelectContent>
@@ -112,30 +130,30 @@ export function GoldenSetForm({ mode, initialData }: GoldenSetFormProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField error={errors.name}>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          onChange={(e) => handleChange("name", e.target.value)}
           placeholder="e.g. Matrícula Imóvel — Golden Set 2026-Q2"
-          required
           maxLength={200}
+          aria-invalid={!!errors.name}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
           value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          onChange={(e) => handleChange("description", e.target.value)}
           placeholder="Brief description of this golden set's purpose..."
           rows={3}
         />
-      </div>
+      </FormField>
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={loading}>

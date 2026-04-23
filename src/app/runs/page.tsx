@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/header";
 import { RunList } from "@/components/runs/run-list";
 import { ImportRunDialog } from "@/components/runs/import-run-dialog";
 import { Button } from "@/components/ui/button";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 interface EvalRun {
   id: string;
@@ -70,7 +71,7 @@ export default function RunsPage() {
       </PageHeader>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground py-8 text-center">Loading...</p>
+        <TableSkeleton columns={9} rows={5} headers={["Run ID", "Layer", "Tier", "Score", "Gate", "Tasks", "Source", "Date", "Actions"]} />
       ) : (
         <RunList runs={runs} />
       )}

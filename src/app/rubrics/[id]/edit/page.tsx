@@ -24,6 +24,7 @@ export default async function EditRubricPage({
       <PageHeader
         title={`Edit: ${rubric.name}`}
         description="Update rubric configuration and text"
+        breadcrumbs={[{ label: "Rubrics", href: "/rubrics" }, { label: rubric.name, href: `/rubrics/${id}` }, { label: "Edit" }]}
       />
       <RubricForm
         mode="edit"

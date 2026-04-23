@@ -61,6 +61,7 @@ export default async function ContractDetailPage({
       <PageHeader
         title={`${contract.method} ${contract.endpoint}`}
         description={contract.service_name}
+        breadcrumbs={[{ label: "Contracts", href: "/contracts" }, { label: `${contract.method} ${contract.endpoint}` }]}
       >
         <Button variant="outline" render={<Link href={`/contracts/${id}/edit`} />}>
           Edit

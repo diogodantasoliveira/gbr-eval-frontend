@@ -55,7 +55,7 @@ export default async function ConventionDetailPage({
 
   return (
     <div className="space-y-8">
-      <PageHeader title={rule.name} description={rule.description ?? undefined}>
+      <PageHeader title={rule.name} description={rule.description ?? undefined} breadcrumbs={[{ label: "Conventions", href: "/conventions" }, { label: rule.name }]}>
         <Button
           variant="outline"
           render={<Link href={`/conventions/${id}/edit`} />}

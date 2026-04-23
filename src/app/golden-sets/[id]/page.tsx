@@ -58,7 +58,7 @@ export default async function GoldenSetDetailPage({
 
   return (
     <div>
-      <PageHeader title={gs.name} description={gs.description ?? undefined}>
+      <PageHeader title={gs.name} description={gs.description ?? undefined} breadcrumbs={[{ label: "Golden Sets", href: "/golden-sets" }, { label: gs.name }]}>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"

@@ -22,6 +22,7 @@ import {
 import { RunDetail } from "@/components/runs/run-detail";
 import { RegressionView } from "@/components/runs/regression-view";
 import { GateMatrix } from "@/components/runs/gate-matrix";
+import { EngineeringFindings } from "@/components/runs/engineering-findings";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,7 @@ export default async function RunDetailPage({
     .map((tr) => ({
       ...tr,
       passed: tr.passed === 1,
-      grader_results: safeJsonParse(tr.grader_results ?? "[]", []),
+      grader_results: safeJsonParse<Array<{ grader_type: string; field?: string; passed: boolean; score: number; weight?: number; required?: boolean; details?: string; error?: string | null; severity?: string | null; file_path?: string | null }>>(tr.grader_results ?? "[]", []),
       reducer_scores: safeJsonParse<Record<string, number>>(tr.reducer_scores ?? "{}", {}),
       epoch_scores: safeJsonParse<number[]>(tr.epoch_scores ?? "[]", []),
     }));
@@ -86,6 +87,7 @@ export default async function RunDetailPage({
       <PageHeader
         title={run.run_id}
         description={`${run.layer}${run.tier ? ` / ${run.tier}` : ""} — imported ${new Date(run.imported_at).toLocaleString()}`}
+        breadcrumbs={[{ label: "Runs", href: "/runs" }, { label: run.run_id }]}
       >
         <Button variant="outline" render={<Link href={`/runs/compare?a=${id}`} />}>
           Compare
@@ -173,6 +175,9 @@ export default async function RunDetailPage({
             gateResult={run.gate_result}
             taskResults={taskResults}
           />
+          {taskResults.some((tr) =>
+            tr.grader_results.some((g) => g.grader_type === "engineering_judge")
+          ) && <EngineeringFindings taskResults={taskResults} />}
           <RunDetail taskResults={taskResults} />
         </TabsContent>
 

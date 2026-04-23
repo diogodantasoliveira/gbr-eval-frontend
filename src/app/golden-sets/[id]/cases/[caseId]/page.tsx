@@ -58,6 +58,7 @@ export default async function CaseDetailPage({
       <PageHeader
         title={`Case #${String(c.case_number).padStart(3, "0")}`}
         description={gs.name}
+        breadcrumbs={[{ label: "Golden Sets", href: "/golden-sets" }, { label: gs.name, href: `/golden-sets/${id}` }, { label: `Case #${String(c.case_number).padStart(3, "0")}` }]}
       >
         <Button
           variant="outline"

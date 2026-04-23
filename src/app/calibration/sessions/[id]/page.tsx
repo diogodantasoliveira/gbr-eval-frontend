@@ -101,6 +101,7 @@ export default async function SessionDetailPage({
       <PageHeader
         title={`Calibration Session`}
         description={`${skill?.name ?? session.skill_id} — ${goldenSet?.name ?? session.golden_set_id}`}
+        breadcrumbs={[{ label: "Calibration", href: "/calibration" }, { label: session.id }]}
       >
         <Badge variant={session.status === "completed" ? "default" : "secondary"}>
           {session.status === "in_progress" ? "In Progress" : "Completed"}

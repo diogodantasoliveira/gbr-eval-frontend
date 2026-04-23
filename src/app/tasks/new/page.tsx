@@ -7,6 +7,7 @@ export default function NewTaskPage() {
       <PageHeader
         title="New Task"
         description="Create a new eval task using the EVAL First wizard"
+        breadcrumbs={[{ label: "Tasks", href: "/tasks" }, { label: "New Task" }]}
       />
       <TaskWizard mode="create" />
     </div>

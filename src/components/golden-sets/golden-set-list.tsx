@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Pagination } from "@/components/ui/pagination";
+import { usePagination } from "@/hooks/use-pagination";
 import {
   Table,
   TableBody,
@@ -63,6 +65,8 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
     if (filterStatus !== "all" && gs.status !== filterStatus) return false;
     return true;
   });
+
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(filtered);
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete golden set "${name}"? This cannot be undone.`)) return;
@@ -139,7 +143,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((gs) => (
+              paginatedItems.map((gs) => (
                 <TableRow key={gs.id}>
                   <TableCell>
                     <Link
@@ -204,6 +208,7 @@ export function GoldenSetList({ initialData }: GoldenSetListProps) {
           </TableBody>
         </Table>
       </div>
+      <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
     </div>
   );
 }

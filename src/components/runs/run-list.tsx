@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Trash2, Eye } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
+import { usePagination } from "@/hooks/use-pagination";
 import {
   Table,
   TableHeader,
@@ -97,6 +99,8 @@ export function RunList({ runs }: RunListProps) {
     return true;
   });
 
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(filtered);
+
   async function handleDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -121,6 +125,7 @@ export function RunList({ runs }: RunListProps) {
     <>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 pb-4">
+        <span className="text-xs text-muted-foreground self-center">{filtered.length} runs</span>
         <Select value={filterLayer} onValueChange={(v) => { if (v) setFilterLayer(v); }}>
           <SelectTrigger size="sm" className="w-32">
             <SelectValue placeholder="Layer" />
@@ -175,6 +180,7 @@ export function RunList({ runs }: RunListProps) {
           No runs found.
         </p>
       ) : (
+        <>
         <Table>
           <TableHeader>
             <TableRow>
@@ -190,7 +196,7 @@ export function RunList({ runs }: RunListProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((run) => (
+            {paginatedItems.map((run) => (
               <TableRow key={run.id}>
                 <TableCell className="font-mono text-xs">
                   <Link
@@ -254,6 +260,8 @@ export function RunList({ runs }: RunListProps) {
             ))}
           </TableBody>
         </Table>
+        <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
+        </>
       )}
 
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>

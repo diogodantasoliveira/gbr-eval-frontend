@@ -34,7 +34,7 @@ export default async function SkillDetailPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={skill.name} description={skill.doc_type}>
+      <PageHeader title={skill.name} description={skill.doc_type} breadcrumbs={[{ label: "Skills", href: "/skills" }, { label: skill.name }]}>
         <Button variant="outline" render={<Link href={`/skills/${id}/edit`} />}>
           Edit Skill
         </Button>

@@ -27,6 +27,7 @@ export default async function EditGoldenSetPage({
       <PageHeader
         title="Edit Golden Set"
         description={`Editing: ${gs.name}`}
+        breadcrumbs={[{ label: "Golden Sets", href: "/golden-sets" }, { label: gs.name, href: `/golden-sets/${gs.id}` }, { label: "Edit" }]}
       />
       <GoldenSetForm
         mode="edit"

@@ -10,7 +10,7 @@ export default function NewRubricPage() {
 
   return (
     <div>
-      <PageHeader title="New Rubric" description="Create a new LLM judge rubric" />
+      <PageHeader title="New Rubric" description="Create a new LLM judge rubric" breadcrumbs={[{ label: "Rubrics", href: "/rubrics" }, { label: "New Rubric" }]} />
       <RubricForm mode="create" skills={allSkills} />
     </div>
   );

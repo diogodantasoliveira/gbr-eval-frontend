@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { FormField } from "@/components/ui/form-field";
 import {
   Select,
   SelectContent,
@@ -50,6 +51,7 @@ const CATEGORIES = ["extraction", "classification", "decision", "general"];
 export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<RubricFormData>({
     name: initialData?.name ?? "",
     skill_id: initialData?.skill_id ?? "",
@@ -63,10 +65,28 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
 
   function handleChange(field: keyof RubricFormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  function validate(): boolean {
+    const newErrors: Record<string, string> = {};
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.rubric_text.trim()) newErrors.rubric_text = "Rubric text is required";
+    const score = parseFloat(form.min_score);
+    if (isNaN(score) || score < 1 || score > 5) newErrors.min_score = "Min score must be between 1.0 and 5.0";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setSubmitting(true);
 
     try {
@@ -92,7 +112,11 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error ?? "Request failed");
+        if (data.fieldErrors) {
+          setErrors(data.fieldErrors);
+        } else {
+          toast.error(data.error ?? "Request failed");
+        }
         return;
       }
 
@@ -113,18 +137,18 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
-      <div className="space-y-1.5">
+      <FormField error={errors.name}>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           value={form.name}
           onChange={(e) => handleChange("name", e.target.value)}
           placeholder="e.g. extraction_quality_v1"
-          required
+          aria-invalid={!!errors.name}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="category">Category</Label>
         <Select
           value={form.category}
@@ -141,9 +165,9 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="skill_id">Skill (optional)</Label>
         <Select
           value={form.skill_id}
@@ -161,9 +185,9 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="model">Model</Label>
         <Select
           value={form.model}
@@ -180,9 +204,9 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField error={errors.min_score}>
         <Label htmlFor="min_score">Min Score (1.0 – 5.0)</Label>
         <Input
           id="min_score"
@@ -192,11 +216,11 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
           step={0.1}
           value={form.min_score}
           onChange={(e) => handleChange("min_score", e.target.value)}
-          required
+          aria-invalid={!!errors.min_score}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="status">Status</Label>
         <Select
           value={form.status}
@@ -211,7 +235,7 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
             <SelectItem value="deprecated">Deprecated</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
       {mode === "edit" && initialData?.promotion_status && (
         <div className="space-y-1.5">
@@ -227,7 +251,7 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
         </div>
       )}
 
-      <div className="space-y-1.5">
+      <FormField error={errors.rubric_text}>
         <Label htmlFor="rubric_text">Rubric Text</Label>
         <Textarea
           id="rubric_text"
@@ -236,11 +260,12 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
           placeholder="Describe what this rubric evaluates and how the LLM judge should score responses..."
           rows={10}
           className="font-mono text-xs"
+          aria-invalid={!!errors.rubric_text}
         />
-      </div>
+      </FormField>
 
       {mode === "edit" && (
-        <div className="space-y-1.5">
+        <FormField>
           <Label htmlFor="change_reason">Change Reason (optional)</Label>
           <Input
             id="change_reason"
@@ -251,7 +276,7 @@ export function RubricForm({ mode, rubricId, initialData, skills }: RubricFormPr
           <p className="text-xs text-muted-foreground">
             A version snapshot is created automatically when rubric text changes.
           </p>
-        </div>
+        </FormField>
       )}
 
       <div className="flex gap-2 pt-2">

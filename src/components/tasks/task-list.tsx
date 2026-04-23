@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil, Trash2, Eye, Download } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
+import { usePagination } from "@/hooks/use-pagination";
 import {
   Table,
   TableBody,
@@ -79,6 +81,8 @@ export function TaskList({ initialData }: TaskListProps) {
     if (filterStatus !== "all" && t.status !== filterStatus) return false;
     return true;
   });
+
+  const { page, pageCount, paginatedItems, onPageChange } = usePagination(filtered);
 
   async function handleDelete(id: string, taskId: string) {
     if (!confirm(`Delete task "${taskId}"? This cannot be undone.`)) return;
@@ -172,7 +176,7 @@ export function TaskList({ initialData }: TaskListProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((t) => (
+              paginatedItems.map((t) => (
                 <TableRow key={t.id}>
                   <TableCell>
                     <Link
@@ -253,6 +257,7 @@ export function TaskList({ initialData }: TaskListProps) {
           </TableBody>
         </Table>
       </div>
+      <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
     </div>
   );
 }

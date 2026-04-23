@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/ui/form-field";
 import {
   Select,
   SelectContent,
@@ -33,6 +34,7 @@ interface SkillFormProps {
 export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<SkillFormData>({
     name: initialData?.name ?? "",
     doc_type: initialData?.doc_type ?? "",
@@ -44,10 +46,27 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
 
   function handleChange(field: keyof SkillFormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  function validate(): boolean {
+    const newErrors: Record<string, string> = {};
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.doc_type.trim()) newErrors.doc_type = "Doc type is required";
+    if (!form.version.trim()) newErrors.version = "Version is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setSubmitting(true);
 
     try {
@@ -64,7 +83,11 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error ?? "Request failed");
+        if (data.fieldErrors) {
+          setErrors(data.fieldErrors);
+        } else {
+          toast.error(data.error ?? "Request failed");
+        }
         return;
       }
 
@@ -87,40 +110,40 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
-      <div className="space-y-1.5">
+      <FormField error={errors.name}>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           value={form.name}
           onChange={(e) => handleChange("name", e.target.value)}
           placeholder="e.g. matricula_v1"
-          required
+          aria-invalid={!!errors.name}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField error={errors.doc_type}>
         <Label htmlFor="doc_type">Doc Type</Label>
         <Input
           id="doc_type"
           value={form.doc_type}
           onChange={(e) => handleChange("doc_type", e.target.value)}
           placeholder="e.g. matricula"
-          required
+          aria-invalid={!!errors.doc_type}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField error={errors.version}>
         <Label htmlFor="version">Version</Label>
         <Input
           id="version"
           value={form.version}
           onChange={(e) => handleChange("version", e.target.value)}
           placeholder="1.0.0"
-          required
+          aria-invalid={!!errors.version}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
@@ -129,9 +152,9 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
           placeholder="Optional description"
           rows={3}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="priority">Priority</Label>
         <Select
           value={form.priority}
@@ -147,9 +170,9 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
             <SelectItem value="P3">P3 — Low</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
-      <div className="space-y-1.5">
+      <FormField>
         <Label htmlFor="status">Status</Label>
         <Select
           value={form.status}
@@ -163,7 +186,7 @@ export function SkillForm({ mode, skillId, initialData }: SkillFormProps) {
             <SelectItem value="deprecated">Deprecated</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </FormField>
 
       <div className="flex gap-2 pt-2">
         <Button type="submit" disabled={submitting}>

@@ -20,6 +20,7 @@ export default async function EditSkillPage({
       <PageHeader
         title="Edit Skill"
         description={`Editing: ${skill.name}`}
+        breadcrumbs={[{ label: "Skills", href: "/skills" }, { label: skill.name, href: `/skills/${skill.id}` }, { label: "Edit" }]}
       />
       <SkillForm
         mode="edit"

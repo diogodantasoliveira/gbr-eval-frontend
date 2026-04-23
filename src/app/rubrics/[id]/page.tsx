@@ -87,7 +87,7 @@ export default async function RubricDetailPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={rubric.name} description={`v${rubric.version} — ${rubric.category}`}>
+      <PageHeader title={rubric.name} description={`v${rubric.version} — ${rubric.category}`} breadcrumbs={[{ label: "Rubrics", href: "/rubrics" }, { label: rubric.name }]}>
         <Button variant="outline" render={<Link href={`/rubrics/${id}/edit`} />}>
           Edit Rubric
         </Button>

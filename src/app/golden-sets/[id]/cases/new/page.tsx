@@ -27,6 +27,7 @@ export default async function NewCasePage({
       <PageHeader
         title="New Case"
         description={`Adding a case to: ${gs.name}`}
+        breadcrumbs={[{ label: "Golden Sets", href: "/golden-sets" }, { label: gs.name, href: `/golden-sets/${id}` }, { label: "New Case" }]}
       />
       <AnnotationForm
         goldenSetId={id}

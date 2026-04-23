@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Alert {
   id: string;
@@ -71,7 +72,18 @@ export default function AlertsPage() {
       </PageHeader>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground py-8 text-center">Loading...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-start gap-3 rounded-md border border-border p-3">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-4 w-full max-w-md" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : alerts.length === 0 ? (
         <div className="text-center py-16">
           <AlertTriangle className="size-8 mx-auto mb-3 text-muted-foreground" />

@@ -78,7 +78,7 @@ export default async function EditTaskPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`Edit: ${task.task_id}`} description="Update task configuration">
+      <PageHeader title={`Edit: ${task.task_id}`} description="Update task configuration" breadcrumbs={[{ label: "Tasks", href: "/tasks" }, { label: task.task_id, href: `/tasks/${id}` }, { label: "Edit" }]}>
         <Button variant="outline" render={<Link href={`/tasks/${id}`} />}>
           Cancel
         </Button>

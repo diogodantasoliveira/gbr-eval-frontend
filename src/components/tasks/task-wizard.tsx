@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { FormField } from "@/components/ui/form-field";
 import { GraderPicker, type GraderEntry } from "./grader-picker";
 import { YamlPreview } from "./yaml-preview";
 import {
@@ -109,6 +110,7 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
     ...initialTask,
   }));
   const [saving, setSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [skills, setSkills] = useState<Array<{ id: string; name: string }>>([]);
   const [goldenSets, setGoldenSets] = useState<Array<{ id: string; name: string }>>([]);
 
@@ -125,6 +127,13 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
 
   function set<K extends keyof WizardState>(key: K, value: WizardState[K]) {
     setState((prev) => ({ ...prev, [key]: value }));
+    if (fieldErrors[key as string]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key as string];
+        return next;
+      });
+    }
   }
 
   function setChecklist(key: keyof EvalChecklist, value: string) {
@@ -132,10 +141,16 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
       ...prev,
       checklist: { ...prev.checklist, [key]: value },
     }));
+    if (fieldErrors[key as string]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key as string];
+        return next;
+      });
+    }
   }
 
-  // Validation per step
-  function stepValid(idx: number): boolean {
+  function stepIsValid(idx: number): boolean {
     if (idx === 0) {
       return (
         state.task_id.trim().length > 0 &&
@@ -149,7 +164,38 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
         ({ key }) => (state.checklist[key] ?? "").trim().length > 0
       );
     }
-    // Steps 2, 3, 4 always valid (optional fields)
+    return true;
+  }
+
+  function validateStep(idx: number): boolean {
+    if (idx === 0) {
+      const newErrors: Record<string, string> = {};
+      if (!state.task_id.trim()) {
+        newErrors.task_id = "Task ID is required";
+      } else if (!/^[a-z0-9_.-]+$/.test(state.task_id)) {
+        newErrors.task_id = "Lowercase letters, digits, dots, dashes, and underscores only";
+      }
+      if (!state.category) newErrors.category = "Category is required";
+      if (!state.layer) newErrors.layer = "Layer is required";
+      if (Object.keys(newErrors).length > 0) {
+        setFieldErrors((prev) => ({ ...prev, ...newErrors }));
+        return false;
+      }
+      return true;
+    }
+    if (idx === 1) {
+      const newErrors: Record<string, string> = {};
+      EVAL_CHECKLIST_QUESTIONS.forEach(({ key, label }) => {
+        if (!(state.checklist[key] ?? "").trim()) {
+          newErrors[key as string] = `${label} is required`;
+        }
+      });
+      if (Object.keys(newErrors).length > 0) {
+        setFieldErrors((prev) => ({ ...prev, ...newErrors }));
+        return false;
+      }
+      return true;
+    }
     return true;
   }
 
@@ -359,43 +405,44 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
           {/* Step 1: Metadata */}
           {stepIndex === 0 && (
             <>
-              <div className="space-y-1">
+              <FormField error={fieldErrors.task_id}>
                 <Label>Task ID <span className="text-destructive">*</span></Label>
                 <Input
                   value={state.task_id}
                   onChange={(e) => set("task_id", e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
                   placeholder="extraction.matricula.cpf"
                   className="font-mono"
+                  aria-invalid={!!fieldErrors.task_id}
                 />
                 <p className="text-xs text-muted-foreground">
                   Lowercase, dots/dashes/underscores only. Pattern: category.doc_type.field
                 </p>
-              </div>
+              </FormField>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
+                <FormField error={fieldErrors.category}>
                   <Label>Category <span className="text-destructive">*</span></Label>
                   <Select value={state.category} onValueChange={(v) => set("category", v ?? "extraction")}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger aria-invalid={!!fieldErrors.category}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {["classification","extraction","decision","citation","cost","latency","code_quality","tenant_isolation","convention"].map((c) => (
                         <SelectItem key={c} value={c}>{c}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </FormField>
 
-                <div className="space-y-1">
+                <FormField error={fieldErrors.layer}>
                   <Label>Layer <span className="text-destructive">*</span></Label>
                   <Select value={state.layer} onValueChange={(v) => set("layer", v ?? "product")}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger aria-invalid={!!fieldErrors.layer}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {["engineering","product","operational","compliance"].map((l) => (
                         <SelectItem key={l} value={l}>{l}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </FormField>
 
                 <div className="space-y-1">
                   <Label>Tier</Label>
@@ -615,7 +662,7 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
                 All 7 questions are required before a task can be activated.
               </p>
               {EVAL_CHECKLIST_QUESTIONS.map(({ key, label, placeholder }) => (
-                <div key={key} className="space-y-1">
+                <FormField key={key} error={fieldErrors[key as string]}>
                   <Label>
                     {label} <span className="text-destructive">*</span>
                   </Label>
@@ -624,8 +671,9 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
                     onChange={(e) => setChecklist(key, e.target.value)}
                     placeholder={placeholder}
                     rows={2}
+                    aria-invalid={!!fieldErrors[key as string]}
                   />
-                </div>
+                </FormField>
               ))}
             </div>
           )}
@@ -757,15 +805,17 @@ export function TaskWizard({ mode, initialTask }: TaskWizardProps) {
         <div>
           {stepIndex < STEPS.length - 1 ? (
             <Button
-              onClick={() => setStepIndex((i) => i + 1)}
-              disabled={!stepValid(stepIndex)}
+              onClick={() => {
+                if (validateStep(stepIndex)) setStepIndex((i) => i + 1);
+              }}
+              disabled={saving}
             >
               Next
             </Button>
           ) : (
             <Button
               onClick={() => save()}
-              disabled={saving || !stepValid(0)}
+              disabled={saving || !stepIsValid(0)}
             >
               {saving ? "Saving..." : mode === "create" ? "Create Task" : "Save Changes"}
             </Button>

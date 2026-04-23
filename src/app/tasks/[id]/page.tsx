@@ -51,7 +51,7 @@ export default async function TaskDetailPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={task.task_id} description={task.description ?? task.category}>
+      <PageHeader title={task.task_id} description={task.description ?? task.category} breadcrumbs={[{ label: "Tasks", href: "/tasks" }, { label: task.task_id }]}>
         <Button variant="outline" render={<Link href={`/tasks/${id}/edit`} />}>
           Edit Task
         </Button>
